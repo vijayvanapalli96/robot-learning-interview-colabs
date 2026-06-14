@@ -38,7 +38,7 @@ Replace the notebook name for notebooks `02` and `03`.
 - They avoid `flash-attn` because it can be fragile in Colab.
 - The default model is the small `HuggingFaceTB/SmolVLM-256M-Instruct`.
 - Adapter outputs are saved under `MyDrive/smolvlm_lora_lab`.
-- The setup cell installs packages once, restarts the runtime, and then verifies Pillow. This avoids mixed compiled-extension imports in Colab.
+- The setup cell installs packages once, restarts the runtime, and then verifies Pillow and the current SmolVLM auto class, `AutoModelForImageTextToText`.
 
 ## Sources
 

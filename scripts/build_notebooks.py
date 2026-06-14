@@ -59,7 +59,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-SETUP_SENTINEL = Path("/content/.smolvlm_lora_lab_setup_complete")
+SETUP_SENTINEL = Path("/content/.smolvlm_lora_lab_setup_v2_complete")
 
 if not SETUP_SENTINEL.exists():
     subprocess.run(
@@ -71,7 +71,7 @@ if not SETUP_SENTINEL.exists():
             "-q",
             "-U",
             "--no-cache-dir",
-            "transformers",
+            "transformers>=4.53.0",
             "datasets",
             "accelerate",
             "peft",
@@ -89,10 +89,13 @@ if not SETUP_SENTINEL.exists():
     os.kill(os.getpid(), 9)
 
 import PIL
+import transformers
+from transformers import AutoModelForImageTextToText, AutoProcessor
 from PIL import Image, ImageDraw
 
 print("Pillow:", PIL.__version__)
 print("Pillow path:", PIL.__file__)
+print("Transformers:", transformers.__version__)
 """
 
 
@@ -360,7 +363,7 @@ print("Answer:", train_dataset[0]["messages"][2]["content"][0]["text"])
 MODEL_HELPERS = r"""
 import gc
 import torch
-from transformers import AutoModelForVision2Seq, AutoProcessor
+from transformers import AutoModelForImageTextToText, AutoProcessor
 
 MODEL_ID = "HuggingFaceTB/SmolVLM-256M-Instruct"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -388,7 +391,7 @@ def load_base_model():
     }
     if DEVICE == "cuda":
         kwargs["device_map"] = "auto"
-    model = AutoModelForVision2Seq.from_pretrained(MODEL_ID, **kwargs)
+    model = AutoModelForImageTextToText.from_pretrained(MODEL_ID, **kwargs)
     if DEVICE != "cuda":
         model = model.to(DEVICE)
     processor = AutoProcessor.from_pretrained(MODEL_ID)
@@ -451,7 +454,7 @@ clear_memory()
 TRAINING_CODE = r"""
 import torch
 from peft import LoraConfig
-from transformers import AutoModelForVision2Seq, AutoProcessor, BitsAndBytesConfig
+from transformers import AutoModelForImageTextToText, AutoProcessor, BitsAndBytesConfig
 from trl import SFTConfig, SFTTrainer
 
 MODEL_ID = "HuggingFaceTB/SmolVLM-256M-Instruct"
@@ -483,7 +486,7 @@ if USE_4BIT:
         bnb_4bit_compute_dtype=TORCH_DTYPE,
     )
 
-model = AutoModelForVision2Seq.from_pretrained(MODEL_ID, **model_kwargs)
+model = AutoModelForImageTextToText.from_pretrained(MODEL_ID, **model_kwargs)
 processor = AutoProcessor.from_pretrained(MODEL_ID)
 model.config.use_cache = False
 
@@ -547,7 +550,7 @@ EVAL_CODE = r"""
 import gc
 import torch
 from peft import PeftModel
-from transformers import AutoModelForVision2Seq, AutoProcessor
+from transformers import AutoModelForImageTextToText, AutoProcessor
 
 MODEL_ID = "HuggingFaceTB/SmolVLM-256M-Instruct"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -577,7 +580,7 @@ def load_model(with_adapter=False):
     }
     if DEVICE == "cuda":
         kwargs["device_map"] = "auto"
-    model = AutoModelForVision2Seq.from_pretrained(MODEL_ID, **kwargs)
+    model = AutoModelForImageTextToText.from_pretrained(MODEL_ID, **kwargs)
     if with_adapter:
         model = PeftModel.from_pretrained(model, str(ADAPTER_DIR))
     if DEVICE != "cuda":
