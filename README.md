@@ -1,46 +1,47 @@
-# Robot Learning Interview Colab Notebooks
+# SmolVLM LoRA Fine-Tuning Colab Lab
 
-This repo is designed for 24-hour interview prep around VLMs, VLAs, hierarchy, action representation, and real robot deployment.
+This repo contains three Colab notebooks for learning how vision-language model fine-tuning works with SmolVLM, LoRA adapters, PEFT, and TRL.
 
-The goal is not to train a serious robot model. The goal is to make the ideas runnable, speakable, and easy to rehearse.
+The notebooks use a tiny synthetic visual question answering dataset. The dataset is intentionally unusual: it contains generated glyph panels with colored shapes, marker dots, arrows, and made-up answer codes. That makes it easier to see the difference between the base model and the fine-tuned adapter.
 
 ## Notebooks
 
-1. `00_interview_map.ipynb`
-   - Builds the compact mental model: VLM -> VLA -> policy -> robot deployment.
-   - Produces a one-page interview map.
+1. `01_smolvlm_dataset_and_baseline.ipynb`
+   - Creates the synthetic VQA dataset.
+   - Saves images and metadata to Google Drive.
+   - Loads the base SmolVLM model.
+   - Runs baseline predictions before fine-tuning.
 
-2. `01_vlm_to_vla_training_loop.ipynb`
-   - Shows the conceptual move from image+text -> text to image+text+robot state -> action chunks.
-   - Includes a tiny PyTorch-style skeleton.
+2. `02_smolvlm_lora_finetune.ipynb`
+   - Loads or regenerates the dataset.
+   - Fine-tunes `HuggingFaceTB/SmolVLM-256M-Instruct` with LoRA adapters.
+   - Saves the adapter to Google Drive.
 
-3. `02_action_chunking_latency_tradeoffs.ipynb`
-   - Simulates action chunk size tradeoffs.
-   - Helps explain smoothness, responsiveness, jitter, and latency.
+3. `03_evaluate_adapter.ipynb`
+   - Reloads the base model and the saved LoRA adapter.
+   - Compares base-model outputs against adapter outputs.
+   - Builds a small before/after results table.
 
-4. `03_hierarchy_ghost_wheelchair.ipynb`
-   - Turns the GHOST hierarchy idea into a wheelchair-pushing task decomposition.
-   - Produces subgoals, safety constraints, and evaluation hooks.
+## Colab Links
 
-5. `04_policy_evaluation_failure_logging.ipynb`
-   - Creates a tiny failure log and evaluation dashboard.
-   - Trains the instinct to talk about success rate, interventions, latency, and failure modes.
-
-6. `05_optional_nanovlm_code_reading.ipynb`
-   - Optional code-reading notebook for nanoVLM-style VLM architecture.
-   - Use only if setup stays clean.
-
-## Suggested 24-hour sequence
-
-Run `00`, `01`, `03`, and `04` first. Run `02` if you need more confidence discussing action chunks. Run `05` only if you have spare time.
-
-## Opening in Colab
-
-After pushing this repo to GitHub, open a notebook with:
+After pushing to GitHub, open:
 
 ```text
-https://colab.research.google.com/github/<your-username>/<repo-name>/blob/main/notebooks/00_interview_map.ipynb
+https://colab.research.google.com/github/vijayvanapalli96/robot-learning-interview-colabs/blob/main/notebooks/01_smolvlm_dataset_and_baseline.ipynb
 ```
 
-Replace the notebook filename as needed.
+Replace the notebook name for notebooks `02` and `03`.
+
+## Notes
+
+- These notebooks favor reliability over maximum speed.
+- They avoid `flash-attn` because it can be fragile in Colab.
+- The default model is the small `HuggingFaceTB/SmolVLM-256M-Instruct`.
+- Adapter outputs are saved under `MyDrive/smolvlm_lora_lab`.
+
+## Sources
+
+- Hugging Face SmolVLM model card: https://huggingface.co/HuggingFaceTB/SmolVLM-256M-Instruct
+- Hugging Face SmolVLM fine-tuning cookbook: https://huggingface.co/learn/cookbook/en/fine_tuning_smol_vlm_sft_trl
+- TRL SFTTrainer docs: https://huggingface.co/docs/trl/en/sft_trainer
 

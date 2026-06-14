@@ -1,5 +1,10 @@
-pandas
+transformers
+datasets
+accelerate
+peft
+trl
+bitsandbytes
+pillow
 matplotlib
-numpy
-torch
+pandas
 
