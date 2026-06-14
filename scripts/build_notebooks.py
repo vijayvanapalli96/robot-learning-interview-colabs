@@ -53,11 +53,46 @@ def write_notebook(filename, cells):
 SETUP_INSTALL = r"""
 # Run this once at the top of a fresh Colab runtime.
 %pip -q install -U --no-cache-dir transformers datasets accelerate peft trl bitsandbytes matplotlib pandas
-%pip -q install --force-reinstall --no-cache-dir "pillow==11.3.0"
 
-# Colab can occasionally keep stale PIL modules in memory after pip changes.
-# Clear them before importing Pillow again.
+# Colab can occasionally end up with mixed Pillow files on disk.
+# Remove old PIL/Pillow files, reinstall one known-good version, then verify import.
+import glob
+import shutil
+import site
+import subprocess
 import sys
+from pathlib import Path
+
+for module_name in list(sys.modules):
+    if module_name == "PIL" or module_name.startswith("PIL."):
+        del sys.modules[module_name]
+
+subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", "Pillow", "pillow"], check=False)
+
+site_dirs = []
+try:
+    site_dirs.extend(site.getsitepackages())
+except Exception:
+    pass
+try:
+    site_dirs.append(site.getusersitepackages())
+except Exception:
+    pass
+
+for site_dir in site_dirs:
+    for pattern in ["PIL", "Pillow-*.dist-info", "pillow-*.dist-info"]:
+        for path in glob.glob(str(Path(site_dir) / pattern)):
+            p = Path(path)
+            if p.is_dir():
+                shutil.rmtree(p, ignore_errors=True)
+            elif p.exists():
+                p.unlink()
+
+subprocess.run(
+    [sys.executable, "-m", "pip", "install", "--no-cache-dir", "--force-reinstall", "Pillow==10.4.0"],
+    check=True,
+)
+
 for module_name in list(sys.modules):
     if module_name == "PIL" or module_name.startswith("PIL."):
         del sys.modules[module_name]
@@ -66,6 +101,7 @@ import PIL
 from PIL import Image, ImageDraw
 
 print("Pillow:", PIL.__version__)
+print("Pillow path:", PIL.__file__)
 """
 
 
