@@ -4,6 +4,6 @@ accelerate
 peft
 trl
 bitsandbytes
-pillow==10.4.0
+pillow==11.3.0
 matplotlib
 pandas

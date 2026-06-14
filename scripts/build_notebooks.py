@@ -52,50 +52,41 @@ def write_notebook(filename, cells):
 
 SETUP_INSTALL = r"""
 # Run this once at the top of a fresh Colab runtime.
-%pip -q install -U --no-cache-dir transformers datasets accelerate peft trl bitsandbytes matplotlib pandas
-
-# Colab can occasionally end up with mixed Pillow files on disk.
-# Remove old PIL/Pillow files, reinstall one known-good version, then verify import.
-import glob
-import shutil
-import site
+# The first run installs packages and restarts the runtime so compiled Pillow
+# extensions and Python files are loaded from the same version.
+import os
 import subprocess
 import sys
 from pathlib import Path
 
-for module_name in list(sys.modules):
-    if module_name == "PIL" or module_name.startswith("PIL."):
-        del sys.modules[module_name]
+SETUP_SENTINEL = Path("/content/.smolvlm_lora_lab_setup_complete")
 
-subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", "Pillow", "pillow"], check=False)
-
-site_dirs = []
-try:
-    site_dirs.extend(site.getsitepackages())
-except Exception:
-    pass
-try:
-    site_dirs.append(site.getusersitepackages())
-except Exception:
-    pass
-
-for site_dir in site_dirs:
-    for pattern in ["PIL", "Pillow-*.dist-info", "pillow-*.dist-info"]:
-        for path in glob.glob(str(Path(site_dir) / pattern)):
-            p = Path(path)
-            if p.is_dir():
-                shutil.rmtree(p, ignore_errors=True)
-            elif p.exists():
-                p.unlink()
-
-subprocess.run(
-    [sys.executable, "-m", "pip", "install", "--no-cache-dir", "--force-reinstall", "Pillow==10.4.0"],
-    check=True,
-)
-
-for module_name in list(sys.modules):
-    if module_name == "PIL" or module_name.startswith("PIL."):
-        del sys.modules[module_name]
+if not SETUP_SENTINEL.exists():
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "-q",
+            "-U",
+            "--no-cache-dir",
+            "transformers",
+            "datasets",
+            "accelerate",
+            "peft",
+            "trl",
+            "bitsandbytes",
+            "matplotlib",
+            "pandas",
+            "Pillow==11.3.0",
+        ],
+        check=True,
+    )
+    SETUP_SENTINEL.write_text("ok")
+    print("Installed packages. Restarting runtime now.")
+    print("After Colab reconnects, run all cells again from the top.")
+    os.kill(os.getpid(), 9)
 
 import PIL
 from PIL import Image, ImageDraw
