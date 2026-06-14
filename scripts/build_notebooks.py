@@ -52,7 +52,20 @@ def write_notebook(filename, cells):
 
 SETUP_INSTALL = r"""
 # Run this once at the top of a fresh Colab runtime.
-%pip -q install -U transformers datasets accelerate peft trl bitsandbytes pillow matplotlib pandas
+%pip -q install -U --no-cache-dir transformers datasets accelerate peft trl bitsandbytes matplotlib pandas
+%pip -q install --force-reinstall --no-cache-dir "pillow==11.3.0"
+
+# Colab can occasionally keep stale PIL modules in memory after pip changes.
+# Clear them before importing Pillow again.
+import sys
+for module_name in list(sys.modules):
+    if module_name == "PIL" or module_name.startswith("PIL."):
+        del sys.modules[module_name]
+
+import PIL
+from PIL import Image, ImageDraw
+
+print("Pillow:", PIL.__version__)
 """
 
 
@@ -758,4 +771,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

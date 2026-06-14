@@ -38,10 +38,10 @@ Replace the notebook name for notebooks `02` and `03`.
 - They avoid `flash-attn` because it can be fragile in Colab.
 - The default model is the small `HuggingFaceTB/SmolVLM-256M-Instruct`.
 - Adapter outputs are saved under `MyDrive/smolvlm_lora_lab`.
+- The setup cell force-reinstalls Pillow because Colab can sometimes end up with mismatched `PIL` files after package upgrades.
 
 ## Sources
 
 - Hugging Face SmolVLM model card: https://huggingface.co/HuggingFaceTB/SmolVLM-256M-Instruct
 - Hugging Face SmolVLM fine-tuning cookbook: https://huggingface.co/learn/cookbook/en/fine_tuning_smol_vlm_sft_trl
 - TRL SFTTrainer docs: https://huggingface.co/docs/trl/en/sft_trainer
-
